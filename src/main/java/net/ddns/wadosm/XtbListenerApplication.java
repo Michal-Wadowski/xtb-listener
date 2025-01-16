@@ -1,7 +1,7 @@
-package com.example.demo;
+package net.ddns.wadosm;
 
-import com.example.demo.xtb.XtbProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.ddns.wadosm.xtb.XtbProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -11,10 +11,10 @@ import org.springframework.context.annotation.Bean;
 @EnableConfigurationProperties({
         XtbProperties.class
 })
-public class DemoApplication {
+public class XtbListenerApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(DemoApplication.class, args);
+        SpringApplication.run(XtbListenerApplication.class, args);
     }
 
     @Bean

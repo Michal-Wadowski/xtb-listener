@@ -1,4 +1,4 @@
-package com.example.demo.xtb;
+package net.ddns.wadosm.xtb;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;

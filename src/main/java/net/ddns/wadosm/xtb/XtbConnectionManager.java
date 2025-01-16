@@ -1,4 +1,4 @@
-package com.example.demo.xtb;
+package net.ddns.wadosm.xtb;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
