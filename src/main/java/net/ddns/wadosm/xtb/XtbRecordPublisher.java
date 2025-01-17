@@ -29,9 +29,10 @@ public class XtbRecordPublisher {
 
     @SneakyThrows
     private void processRecord(STickRecord record) {
-        String json = objectMapper.writeValueAsString(record);
         log.debug("Sending tick  >>>: {}", record);
+        String json = objectMapper.writeValueAsString(record);
         kafkaTemplate.send(xtbProperties.getXtb().getTopicName(), json);
+        log.debug("done");
     }
 
 }

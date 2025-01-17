@@ -26,8 +26,9 @@ public class XtbConnectionManager {
 
     @PostConstruct
     public void startListening() throws APICommunicationException, IOException {
+        log.info("startListening(): Connecting to XTB");
         xtbConnector.connectStream(new TickRecordOnlyListenerAdapter(xtbRecordPublisher::publishRecord));
-        log.info("XTB Stream connected.");
+        log.info("startListening(): XTB Stream connected");
 
         getXtbPropertiesXtb()
                 .getSubscribePrices()
@@ -55,10 +56,11 @@ public class XtbConnectionManager {
                 .getSubscribePrices()
                 .forEach(this::unsubscribePrice);
         xtbConnector.disconnectStream();
-        log.info("XTB Stream disconnected.");
+        log.info("XTB Stream disconnected");
     }
 
     @RequiredArgsConstructor
+    @Slf4j
     private static class TickRecordOnlyListenerAdapter extends StreamingListener {
 
         private final Consumer<STickRecord> consumer;
@@ -68,7 +70,9 @@ public class XtbConnectionManager {
         }
 
         public void receiveTickRecord(STickRecord tickRecord) {
+            log.debug("received XTB rick record");
             consumer.accept(tickRecord);
+            log.debug("done");
         }
     }
 }

@@ -23,11 +23,12 @@ public class TickRecordsInMongoSnapshotService {
 
     private final ExecutorService executorService = Executors.newCachedThreadPool(Thread.ofVirtual().factory());
 
-
     @SneakyThrows
     @KafkaListener(id = "db.snapshotIntoMongo", topics = "${xtb.topicName}")
     public void listenRecords(String content) {
+        log.debug("received kafka message");
         executorService.submit(() -> processRecord(content));
+        log.debug("done");
     }
 
     @SneakyThrows
