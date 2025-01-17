@@ -3,7 +3,7 @@ spring:
     name: demo
 
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: broker:9092
 
 management:
   endpoints:

@@ -21,6 +21,7 @@ public class XtbProperties {
     public static class Xtb {
         private ServerData.ServerEnum serverEnum;
         private List<String> subscribePrices;
+        private String topicName;
 
         private String login;
         private String password;

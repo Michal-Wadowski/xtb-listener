@@ -6,9 +6,7 @@ services:
     image: confluentinc/confluent-local:7.4.0
     hostname: broker
     ports:
-      - "8182:8082"
       - "9092:9092"
-      - "9101:9101"
     environment:
       KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092'
       KAFKA_CONTROLLER_QUORUM_VOTERS: '1@broker:29093'
