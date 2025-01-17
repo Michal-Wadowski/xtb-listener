@@ -20,7 +20,7 @@ public class XtbRecordPublisher {
     private final ObjectMapper objectMapper;
     private final XtbProperties xtbProperties;
 
-    private final ExecutorService executorService = Executors.newCachedThreadPool(Thread.ofVirtual().factory());
+    private final ExecutorService executorService = Executors.newFixedThreadPool(5);
 
     @SneakyThrows
     public void publishRecord(STickRecord record) {
