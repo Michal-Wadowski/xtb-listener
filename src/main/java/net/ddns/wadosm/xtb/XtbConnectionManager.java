@@ -1,78 +1,65 @@
 package net.ddns.wadosm.xtb;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import pro.xstore.api.message.error.APICommunicationException;
-import pro.xstore.api.message.records.STickRecord;
-import pro.xstore.api.message.records.STradeRecord;
-import pro.xstore.api.streaming.StreamingListener;
+import pro.xstore.api.message.command.APICommandFactory;
+import pro.xstore.api.message.response.LoginResponse;
+import pro.xstore.api.sync.Credentials;
 import pro.xstore.api.sync.SyncAPIConnector;
 
 import java.io.IOException;
-import java.util.function.Consumer;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class XtbConnectionManager {
 
-    private final SyncAPIConnector xtbConnector;
+    private final Credentials xtbCredentials;
     private final XtbProperties xtbProperties;
     private final XtbRecordPublisher xtbRecordPublisher;
 
-    @PostConstruct
-    public void startListening() throws APICommunicationException, IOException {
-        log.info("startListening(): Connecting to XTB");
-        xtbConnector.connectStream(new TickRecordOnlyListenerAdapter(xtbRecordPublisher::publishRecord));
-        log.info("startListening(): XTB Stream connected");
+    private XtbConnectorWrapper connectorWrapper = null;
 
-        getXtbPropertiesXtb()
-                .getSubscribePrices()
-                .forEach(this::subscribedPrice);
+    @Scheduled(fixedDelay = 30*60*1000)
+    public void optionallyStopListeningAndStartNewListening() {
+        stopListening();
+
+        startListening();
     }
 
-    private XtbProperties.Xtb getXtbPropertiesXtb() {
-        return xtbProperties.getXtb();
+    private void startListening() {
+        SyncAPIConnector xtbConnector = getSyncApiConnector(xtbCredentials);
+        connectorWrapper = new XtbConnectorWrapper(xtbConnector, xtbProperties, xtbRecordPublisher);
+        connectorWrapper.startListening();
     }
 
-    @SneakyThrows
-    private void subscribedPrice(String symbol) {
-        xtbConnector.subscribePrice(symbol);
-    }
-
-    @SneakyThrows
-    private void unsubscribePrice(String symbol) {
-        xtbConnector.unsubscribePrice(symbol);
-    }
-
-    @SneakyThrows
     @PreDestroy
     public void stopListening() {
-        getXtbPropertiesXtb()
-                .getSubscribePrices()
-                .forEach(this::unsubscribePrice);
-        xtbConnector.disconnectStream();
-        log.info("XTB Stream disconnected");
-    }
-
-    @RequiredArgsConstructor
-    @Slf4j
-    private static class TickRecordOnlyListenerAdapter extends StreamingListener {
-
-        private final Consumer<STickRecord> consumer;
-
-        public void receiveTradeRecord(STradeRecord tradeRecord) {
-            throw new UnsupportedOperationException("Unsupported receiveTradeRecord(STradeRecord)");
-        }
-
-        public void receiveTickRecord(STickRecord tickRecord) {
-            log.debug("received XTB rick record");
-            consumer.accept(tickRecord);
-            log.debug("done");
+        if (connectorWrapper != null) {
+            connectorWrapper.stopListening();
+            connectorWrapper = null;
         }
     }
+
+    @SneakyThrows
+    private SyncAPIConnector getSyncApiConnector(Credentials xtbCredentials) {
+        SyncAPIConnector connector;
+        try {
+            connector = new SyncAPIConnector(xtbProperties.getXtb().getServerEnum());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        LoginResponse loginResponse = APICommandFactory.executeLoginCommand(connector, xtbCredentials);
+
+        if (loginResponse != null && loginResponse.getStatus()) {
+            return connector;
+        } else {
+            throw new RuntimeException("Can't connect to XTB for some reason");
+        }
+    }
+
 }
