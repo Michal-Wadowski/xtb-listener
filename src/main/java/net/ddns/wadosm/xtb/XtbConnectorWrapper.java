@@ -20,9 +20,9 @@ class XtbConnectorWrapper {
 
     @SneakyThrows
     public void startListening() {
-        log.info("startListening(): Connecting to XTB");
+        log.info("Connecting to XTB");
         xtbConnector.connectStream(new TickRecordOnlyListenerAdapter(xtbRecordPublisher::publishRecord));
-        log.info("startListening(): XTB Stream connected");
+        log.info("XTB Stream connected");
 
         getXtbPropertiesXtb()
                 .getSubscribePrices()
