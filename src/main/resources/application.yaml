@@ -17,4 +17,5 @@ xtb:
     - USDTRY
     - US100
   topicName: "xtb.tickRecord"
+  reconnectPeriod: 600000
 

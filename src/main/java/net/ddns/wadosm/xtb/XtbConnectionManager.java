@@ -24,21 +24,27 @@ public class XtbConnectionManager {
 
     private XtbConnectorWrapper connectorWrapper = null;
 
-    @Scheduled(fixedDelay = 30*60*1000)
-    public void optionallyStopListeningAndStartNewListening() {
-        stopListening();
+    /**
+     * Short time connection overlapping is intended
+     */
+    @Scheduled(fixedDelayString = "${xtb.reconnectPeriod}")
+    public void startNewListeningAndOptionallyStopPreviousOne() {
+        var xtbConnectorWrapper = startListening();
 
-        startListening();
+        optionallyStopListening();
+
+        this.connectorWrapper = xtbConnectorWrapper;
     }
 
-    private void startListening() {
+    private XtbConnectorWrapper startListening() {
         SyncAPIConnector xtbConnector = getSyncApiConnector(xtbCredentials);
-        connectorWrapper = new XtbConnectorWrapper(xtbConnector, xtbProperties, xtbRecordPublisher);
+        var connectorWrapper = new XtbConnectorWrapper(xtbConnector, xtbProperties, xtbRecordPublisher);
         connectorWrapper.startListening();
+        return connectorWrapper;
     }
 
     @PreDestroy
-    public void stopListening() {
+    public void optionallyStopListening() {
         if (connectorWrapper != null) {
             connectorWrapper.stopListening();
             connectorWrapper = null;
